@@ -244,6 +244,10 @@ module ActiveRecord
           options = args.extract_options!
           column(args[0], 'tsvector', options)
         end
+        
+        def identity(name)
+          column(name, :identity)
+        end
       end
 
       ADAPTER_NAME = 'Redshift'
