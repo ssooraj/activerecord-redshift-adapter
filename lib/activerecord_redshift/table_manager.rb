@@ -73,11 +73,12 @@ module ActiverecordRedshift
       sql = "select oid from pg_namespace where nspname = '#{schema_name}' limit 1"
       schema_oid = @connection.execute(sql).first['oid'].to_i
 
-      ## now the diststyle 0 = even, 1 = some column
+      ## now the diststyle 0 = even, 1 = some column, 8 = all
       sql = "select oid,reldiststyle from pg_class where relnamespace = #{schema_oid} and relname = '#{parent_table_name}' limit 1"
       pg_class_row = @connection.execute(sql).first
       reldiststyle = pg_class_row['reldiststyle'].to_i
       even_diststyle = (reldiststyle == 0)
+      all_diststyle = (reldiststyle == 8)
       table_oid = pg_class_row['oid'].to_i
 
       ## get unique and primary key constraints (pg_constraints)
@@ -163,11 +164,12 @@ module ActiverecordRedshift
         else
           sql_sortkeys = " sortkey (#{sortkeys.join(',')})"
         end
+
         sql = <<-SQL
          create #{"temporary " if current_options[:temporary]}table #{table_name}
-         (
-          #{sql_columns.join(', ')}
-         ) #{"diststyle even " if even_diststyle}#{sql_sortkeys}
+           (
+            #{sql_columns.join(', ')}
+           ) #{"diststyle all " if all_diststyle}#{"diststyle even " if even_diststyle}#{sql_sortkeys}
         SQL
         @connection.execute(sql)
       end
