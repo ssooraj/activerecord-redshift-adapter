@@ -9,6 +9,7 @@ describe ActiveRecord::ConnectionAdapters::RedshiftAdapter do
     CREATE TABLE public.test2 ( "id" INTEGER, "name" VARCHAR );
     INSERT INTO public.test VALUES (1, 'first');
     INSERT INTO public.test VALUES (2, 'second');
+    CREATE SCHEMA test;
     CREATE TABLE test.test ( "id" INTEGER NOT NULL, "is" BOOL NOT NULL );
     CREATE TABLE test.test2 ( "id" INTEGER, "is" BOOL );
     sql
@@ -17,6 +18,7 @@ describe ActiveRecord::ConnectionAdapters::RedshiftAdapter do
   after(:all) do
     @connection.query <<-sql
     DROP TABLE public.test, public.test2, test.test, test.test2;
+    DROP SCHEMA test;
     sql
   end
 
@@ -29,7 +31,7 @@ describe ActiveRecord::ConnectionAdapters::RedshiftAdapter do
   describe "#tables" do
     it "returns all tables in public schema" do
       @connection.schema_search_path = "public"
-      @connection.tables.should == ["public.test", "public.test2"]
+      expect(@connection.tables).to eq ["public.test", "public.test2"]
     end
 
     it "returns all tables in all schemas" do

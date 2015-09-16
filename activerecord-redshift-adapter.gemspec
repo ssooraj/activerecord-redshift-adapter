@@ -17,8 +17,8 @@ Gem::Specification.new do |s|
  s.require_path = 'lib'
  s.homepage    = 'http://github.com/fiksu/activerecord-redshift-adapter'
  s.add_dependency "pg"
- s.add_dependency "activerecord", '>= 3.0.0'
- s.add_dependency "activesupport", '>= 3.0.0'
+ s.add_dependency "activerecord", '>= 3.0.0', '< 4.0'
+ s.add_dependency "activesupport", '>= 3.0.0', '< 4.0'
  s.add_dependency "arel", '>= 3.0.0'
  s.add_development_dependency 'rspec'
 end
