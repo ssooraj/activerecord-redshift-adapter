@@ -9,7 +9,15 @@ describe ActiveRecord::ConnectionAdapters::RedshiftAdapter do
     CREATE TABLE public.test2 ( "id" INTEGER, "name" VARCHAR );
     INSERT INTO public.test VALUES (1, 'first');
     INSERT INTO public.test VALUES (2, 'second');
+    sql
+
+    # NOTE(hofer): Redshift requires the schema creation to be done in
+    # a separate query.
+    @connection.query <<-sql
     CREATE SCHEMA test;
+    sql
+
+    @connection.query <<-sql
     CREATE TABLE test.test ( "id" INTEGER NOT NULL, "is" BOOL NOT NULL );
     CREATE TABLE test.test2 ( "id" INTEGER, "is" BOOL );
     sql
