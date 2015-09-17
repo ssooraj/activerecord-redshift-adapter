@@ -24,7 +24,7 @@ describe ActiveRecord::ConnectionAdapters::RedshiftAdapter do
 
   describe "#initialize" do
     it "opens a connection" do
-      @connection.active?.should be_true
+      expect(@connection.active?).to be true
     end
   end
 
@@ -36,7 +36,7 @@ describe ActiveRecord::ConnectionAdapters::RedshiftAdapter do
 
     it "returns all tables in all schemas" do
       @connection.schema_search_path = "public, test"
-      @connection.tables.should == ["public.test", "public.test2", "test.test", "test.test2"]
+      expect(@connection.tables).to eq(["public.test", "public.test2", "test.test", "test.test2"])
     end
   end
 
@@ -44,56 +44,56 @@ describe ActiveRecord::ConnectionAdapters::RedshiftAdapter do
     it "returns all columns in table in public schema" do
       id = ActiveRecord::ConnectionAdapters::RedshiftColumn.new("id", "", "integer", true)
       name =  ActiveRecord::ConnectionAdapters::RedshiftColumn.new("name", "", "character varying(80)", true)
-      @connection.columns("test").should == [id, name]
+      expect(@connection.columns("test")).to eq([id, name])
     end
 
     it "returns all columns in table" do
       id = ActiveRecord::ConnectionAdapters::RedshiftColumn.new("id", "", "integer", false)
       is =  ActiveRecord::ConnectionAdapters::RedshiftColumn.new("is", "", "boolean", false)
-      @connection.columns("test.test").should == [id, is]
+      expect(@connection.columns("test.test")).to eq([id, is])
     end
   end
 
   describe "#table_exists?" do
     it "checks if table in schema exists" do
-      @connection.table_exists?("public.test").should be_true
+      expect(@connection.table_exists?("public.test")).to be true
     end
 
     it "checks if unknown table in schema doesn't exist" do
-      @connection.table_exists?("public.null").should be_false
+      expect(@connection.table_exists?("public.null")).to be false
     end
 
     it "checks if table in implied schema exists" do
-      @connection.table_exists?("test2").should be_true
+      expect(@connection.table_exists?("test2")).to be true
     end
   end
 
   describe "#current_database" do
     it "returns current database" do
-      @connection.current_database.should == TEST_CONNECTION_HASH[:database]
+      expect(@connection.current_database).to eq(TEST_CONNECTION_HASH[:database])
     end
   end
 
   describe "#schema_search_path" do
     it "returns current database" do
       @connection.schema_search_path = '"$user", public'
-      @connection.schema_search_path.should == '"$user", public'
+      expect(@connection.schema_search_path).to eq('"$user", public')
     end
   end
 
   describe "#update_sql" do
     it "returns the number of updated rows" do
-      @connection.update_sql("UPDATE public.test SET name = 'test'").should == 2
+      expect(@connection.update_sql("UPDATE public.test SET name = 'test'")).to eq(2)
     end
   end
 
   describe "#quote_string" do
     it "quotes the string without surrouding quotes" do
-      @connection.quote_string("quote'd").should == "quote''d"
+      expect(@connection.quote_string("quote'd")).to eq("quote''d")
     end
 
     it "returns identical string when no quoting is required" do
-      @connection.quote_string("quote").should == "quote"
+      expect(@connection.quote_string("quote")).to eq("quote")
     end
   end
 end
