@@ -10,6 +10,7 @@ rvm:
   - 2.1.7
 
 before_script:
+  - cp spec/dummy/config/database-test.yml spec/dummy/config/database.yml
   - createdb redshift_test
 
 script: bundle exec rspec
