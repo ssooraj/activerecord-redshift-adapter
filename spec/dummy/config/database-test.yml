@@ -1,0 +1,4 @@
+host: localhost
+database: redshift_test
+port: 5432
+username: postgres
