@@ -1,0 +1,16 @@
+sudo: false
+
+language: ruby
+bundler_args: --without debug
+cache: bundler
+
+rvm:
+  - 1.9.3
+  - 2.0.0
+  - 2.1.7
+
+before_script:
+  - cp spec/dummy/config/database-test.yml spec/dummy/config/database.yml
+  - createdb redshift_test
+
+script: bundle exec rspec
