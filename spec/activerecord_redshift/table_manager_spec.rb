@@ -1,6 +1,7 @@
 require "spec_helper"
 
 describe ActiverecordRedshift::TableManager do
+  TEST_SCHEMA = "test"
   TEST_MANAGER_EXEMPLAR_TABLE = "test.test"
   TEST_MANAGER_TABLE = "test.test2"
 
@@ -8,7 +9,7 @@ describe ActiverecordRedshift::TableManager do
     @connection =  ActiveRecord::Base.redshift_connection(TEST_CONNECTION_HASH)
 
     @connection.query <<-sql
-      CREATE SCHEMA test;
+      CREATE SCHEMA #{TEST_SCHEMA};
     sql
 
     @connection.query <<-sql
@@ -21,7 +22,7 @@ describe ActiverecordRedshift::TableManager do
 
   after(:all) do
     @connection.query "DROP TABLE #{TEST_MANAGER_EXEMPLAR_TABLE};"
-    @connection.query "DROP SCHEMA test;"
+    @connection.query "DROP SCHEMA #{TEST_SCHEMA};"
   end
 
   it "#duplicate_table_sql returns sql to duplicate the table" do
