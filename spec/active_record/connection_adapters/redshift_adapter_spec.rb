@@ -44,7 +44,7 @@ describe ActiveRecord::ConnectionAdapters::RedshiftAdapter do
 
     it "returns all tables in all schemas" do
       @connection.schema_search_path = "public, test"
-      expect(@connection.tables).to eq(["public.test", "public.test2", "test.test", "test.test2"])
+      expect(@connection.tables).to match_array(["public.test", "public.test2", "test.test", "test.test2"])
     end
   end
 

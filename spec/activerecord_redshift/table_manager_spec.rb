@@ -9,6 +9,9 @@ describe ActiverecordRedshift::TableManager do
 
     @connection.query <<-sql
       CREATE SCHEMA test;
+    sql
+
+    @connection.query <<-sql
       CREATE TABLE #{TEST_MANAGER_EXEMPLAR_TABLE} (
         id INTEGER NOT NULL,
         isa BOOL NOT NULL
@@ -18,6 +21,7 @@ describe ActiverecordRedshift::TableManager do
 
   after(:all) do
     @connection.query "DROP TABLE #{TEST_MANAGER_EXEMPLAR_TABLE};"
+    @connection.query "DROP SCHEMA test;"
   end
 
   it "#duplicate_table_sql returns sql to duplicate the table" do
