@@ -8,6 +8,7 @@ describe ActiverecordRedshift::TableManager do
     @connection =  ActiveRecord::Base.redshift_connection(TEST_CONNECTION_HASH)
 
     @connection.query <<-sql
+      CREATE SCHEMA test;
       CREATE TABLE #{TEST_MANAGER_EXEMPLAR_TABLE} (
         id INTEGER NOT NULL,
         isa BOOL NOT NULL
