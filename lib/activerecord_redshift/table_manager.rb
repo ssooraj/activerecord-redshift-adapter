@@ -55,10 +55,14 @@ module ActiverecordRedshift
       @connection.execute("drop table #{table_name}")
     end
 
+    def duplicate_table_sql(options = {})
+      duplicate_table(options.merge(sql_only: true))
+    end
+
     def duplicate_table(options = {})
       current_options = @default_options.merge(options)
       target_table_name = current_options[:table_name]
-      raise "target_table_name not set" if target_table_name.blank?
+      raise "table_name not set" if target_table_name.blank?
       exemplar_table_name = current_options[:exemplar_table_name]
       raise "exemplar_table_name not set" if exemplar_table_name.blank?
       table_name_elements = exemplar_table_name.split('.');
@@ -171,7 +175,11 @@ module ActiverecordRedshift
             #{sql_columns.join(', ')}
            ) #{"diststyle all " if all_diststyle}#{"diststyle even " if even_diststyle}#{sql_sortkeys}
         SQL
-        @connection.execute(sql)
+        if (options[:sql_only])
+          sql
+        else
+          @connection.execute(sql)
+        end
       end
     end
 
