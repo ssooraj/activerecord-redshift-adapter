@@ -26,11 +26,16 @@ describe ActiverecordRedshift::TableManager do
   end
 
   it "#duplicate_table_sql returns sql to duplicate the table" do
-    tm = ActiverecordRedshift::TableManager.new(@connection, table_name: TEST_MANAGER_TABLE)
-    sql = tm.duplicate_table_sql(exemplar_table_name: TEST_MANAGER_EXEMPLAR_TABLE)
-    sql.gsub!(/\s+/m," ") # normalize whitespace
-    expect(sql).to eq(
-      " create temporary table test.test2 ( id integer not null, isa boolean not null ) diststyle even "
-    )
+    begin
+      tm = ActiverecordRedshift::TableManager.new(@connection, table_name: TEST_MANAGER_TABLE)
+      sql = tm.duplicate_table_sql(exemplar_table_name: TEST_MANAGER_EXEMPLAR_TABLE)
+      sql.gsub!(/\s+/m," ") # normalize whitespace
+      expect(sql).to eq(
+        " create temporary table test.test2 ( id integer not null, isa boolean not null ) diststyle even "
+      )
+    rescue ActiveRecord::StatementInvalid => e
+      pending "This spec will fail when run against a PostgreSQL database, instead of Redshift."
+      fail
+    end
   end
 end
