@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
  s.name        = 'activerecord-redshift-adapter'
  s.version     = ActiverecordRedshiftAdapter::VERSION
  s.license     = 'New BSD License'
- s.date        = '2014-03-30'
+ s.date        = '2015-10-02'
  s.summary     = "Rails 3 database adapter support for AWS RedShift."
  s.description = "This gem provides the Rails 3 with database adapter for AWS RedShift."
  s.authors     = ["Keith Gabryelski"]
