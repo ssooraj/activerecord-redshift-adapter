@@ -48,7 +48,7 @@ module ActiveRecord
         return coder.load(value) if encoded?
 
         if timezone && [:datetime, :timestamp].include?(type)
-          self.class.string_to_time_with_timezone(string, timezone)
+          self.class.string_to_time_with_timezone(value, timezone)
         else
           super
         end
