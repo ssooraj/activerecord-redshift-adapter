@@ -244,7 +244,7 @@ module ActiveRecord
           options = args.extract_options!
           column(args[0], 'tsvector', options)
         end
-        
+
         def identity(name)
           column(name, :identity)
         end
@@ -287,7 +287,7 @@ module ActiveRecord
 
       class StatementPool < ConnectionAdapters::StatementPool
         def initialize(connection, max)
-          super
+          super()
           @counter = 0
           @cache   = Hash.new { |h,pid| h[pid] = {} }
         end
@@ -614,7 +614,7 @@ module ActiveRecord
           table_ref = extract_table_ref_from_insert_sql(sql)
           pk = primary_key(table_ref) if table_ref
         end
-        
+
         if pk && use_insert_returning?
           select_value("#{sql} RETURNING #{quote_column_name(pk)}")
         elsif pk
