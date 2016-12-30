@@ -2,7 +2,7 @@ module ActiverecordRedshift
   class TableManager
     attr_reader :default_options
 
-    DEFAULT_OPTIONS = { :exemplar_table_name => nil, :add_identity => false, :temporary => true}
+    DEFAULT_OPTIONS = { :exemplar_table_name => nil, :add_identity => false, :temporary => true, :copy_notnull_constraints => true}
 
     def initialize(connection, default_options = {})
       @connection = connection
@@ -15,7 +15,7 @@ module ActiverecordRedshift
 
       if default_options[:table_name].blank?
         connection_pid = @connection.execute("select pg_backend_pid() as pid").first['pid'].to_i
-        table_name_options[:table_name] = "temporary_events_#{connection_pid}" 
+        table_name_options[:table_name] = "temporary_events_#{connection_pid}"
       end
       @default_options = DEFAULT_OPTIONS.merge(table_name_options).merge(default_options)
     end
@@ -42,6 +42,10 @@ module ActiverecordRedshift
 
     def base_table_name
       return @default_options[:table_name]
+    end
+
+    def copy_notnull_constraints
+      return @default_options[:copy_notnull_constraints]
     end
 
     def table_name
@@ -118,7 +122,7 @@ module ActiverecordRedshift
       @connection.execute(sql).each do |row|
         column_defaults[row['attname']] = row['adsrc']
       end
-      
+
       with_search_path([schema_name]) do
         # select * from pg_table_def where tablename = 'bids' and schemaname = 'public';
         ## column, type, encoding, distkey, sortkey, not null
@@ -136,7 +140,7 @@ module ActiverecordRedshift
           column_name = row['column']
           column_info << column_name
           column_info << row['type']
-          if row['notnull'] == "t"
+          if current_options[:copy_notnull_constraints] && (row['notnull'] == "t")
             column_info << "not null"
           end
           if row['distkey'] == "t"
