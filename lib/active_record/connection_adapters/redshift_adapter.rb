@@ -373,6 +373,9 @@ module ActiveRecord
       # Clears the prepared statements cache.
       def clear_cache!
         @statements.clear
+        @schema_cache_tables.clear if @schema_cache_tables
+        @schema_cache_columns.clear if @schema_cache_columns
+        @schema_cache_keys.clear if @schema_cache_keys
       end
 
       # Is this connection alive and ready for queries?
@@ -825,10 +828,13 @@ module ActiveRecord
         schema, table = Utils.extract_schema_and_table(name.to_s)
         return false unless table
 
+        return @schema_cache_tables[table] if @schema_cache_tables && @schema_cache_tables[table]
+        @schema_cache_tables = {} unless @schema_cache_tables
+
         binds = [[nil, table]]
         binds << [nil, schema] if schema
 
-        exec_query(<<-SQL, 'SCHEMA').rows.first[0].to_i > 0
+        res = exec_query(<<-SQL, 'SCHEMA')
             SELECT COUNT(*)
             FROM pg_class c
             LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -836,6 +842,8 @@ module ActiveRecord
             AND c.relname = '#{table.gsub(/(^"|"$)/,'')}'
             AND n.nspname = #{schema ? "'#{schema}'" : 'ANY (current_schemas(false))'}
         SQL
+
+        @schema_cache_tables[table] = res.rows.first[0].to_i > 0
       end
 
       # Returns true if schema exists.
@@ -978,6 +986,9 @@ module ActiveRecord
 
       # Returns just a table's primary key
       def primary_key(table)
+        return @schema_cache_keys[table].first, @schema_cache_keys[table].last if @schema_cache_keys && @schema_cache_keys[table]
+        @schema_cache_keys = {} unless @schema_cache_keys
+
         row = exec_query(<<-end_sql, 'SCHEMA').rows.first
           SELECT DISTINCT(attr.attname)
           FROM pg_attribute attr
@@ -987,7 +998,8 @@ module ActiveRecord
             AND dep.refobjid = '#{quote_table_name(table)}'::regclass
         end_sql
 
-        row && row.first
+        @schema_cache_keys[table] = [row, row.try(:first)]
+        @schema_cache_keys[table].first && @schema_cache_keys[table].last
       end
 
       # Renames a table.
@@ -1256,7 +1268,10 @@ module ActiveRecord
         #  - format_type includes the column size constraint, e.g. varchar(50)
         #  - ::regclass is a function that gives the id for a table name
         def column_definitions(table_name) #:nodoc:
-          exec_query(<<-end_sql, 'SCHEMA').rows
+          return @schema_cache_columns[table_name] if @schema_cache_columns && @schema_cache_columns[table_name]
+          @schema_cache_columns = {} unless @schema_cache_columns
+
+          res = exec_query(<<-end_sql, 'SCHEMA')
             SELECT a.attname, format_type(a.atttypid, a.atttypmod),
                      pg_get_expr(d.adbin, d.adrelid), a.attnotnull, a.atttypid, a.atttypmod
               FROM pg_attribute a LEFT JOIN pg_attrdef d
@@ -1265,6 +1280,8 @@ module ActiveRecord
                AND a.attnum > 0 AND NOT a.attisdropped
              ORDER BY a.attnum
           end_sql
+
+          @schema_cache_columns[table_name] = res.rows
         end
 
         def extract_pg_identifier_from_name(name)
